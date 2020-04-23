@@ -2,131 +2,83 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
-        "servers_synapsedevdemo_name": {
-            "defaultValue": "synapsedevdemo",
+        "storageAccounts_storagedemo123_name": {
+            "defaultValue": "storagedemo123",
             "type": "String"
         }
     },
     "variables": {},
     "resources": [
         {
-            "type": "Microsoft.Sql/servers/databases",
-            "apiVersion": "2019-06-01-preview",
-            "name": "[concat(parameters('servers_synapsedevdemo_name'), '/DevDemo')]",
-            "location": "centralus",
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2019-06-01",
+            "name": "[parameters('storageAccounts_storagedemo123_name')]",
+            "location": "uksouth",
             "sku": {
-                "name": "DataWarehouse",
-                "tier": "DataWarehouse",
-                "capacity": 2700
+                "name": "Standard_LRS",
+                "tier": "Standard"
             },
-            "kind": "v12.0,user,datawarehouse,gen2",
+            "kind": "StorageV2",
             "properties": {
-                "collation": "SQL_Latin1_General_CP1_CI_AS",
-                "maxSizeBytes": 263882790666240,
-                "catalogCollation": "SQL_Latin1_General_CP1_CI_AS",
-                "readScale": "Disabled",
-                "readReplicaCount": 0,
-                "storageAccountType": "GRS"
+                "largeFileSharesState": "Disabled",
+                "isHnsEnabled": true,
+                "networkAcls": {
+                    "bypass": "AzureServices",
+                    "virtualNetworkRules": [],
+                    "ipRules": [],
+                    "defaultAction": "Allow"
+                },
+                "supportsHttpsTrafficOnly": true,
+                "encryption": {
+                    "services": {
+                        "file": {
+                            "keyType": "Account",
+                            "enabled": true
+                        },
+                        "blob": {
+                            "keyType": "Account",
+                            "enabled": true
+                        }
+                    },
+                    "keySource": "Microsoft.Storage"
+                },
+                "accessTier": "Cool"
             }
         },
         {
-            "type": "Microsoft.Sql/servers/databases/auditingPolicies",
-            "apiVersion": "2014-04-01",
-            "name": "[concat(parameters('servers_synapsedevdemo_name'), '/DevDemo/Default')]",
-            "location": "Central US",
+            "type": "Microsoft.Storage/storageAccounts/blobServices",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_storagedemo123_name'), '/default')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_synapsedevdemo_name'), 'DevDemo')]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_storagedemo123_name'))]"
             ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
             "properties": {
-                "auditingState": "Disabled"
+                "cors": {
+                    "corsRules": []
+                },
+                "deleteRetentionPolicy": {
+                    "enabled": false
+                }
             }
         },
         {
-            "type": "Microsoft.Sql/servers/databases/auditingSettings",
-            "apiVersion": "2017-03-01-preview",
-            "name": "[concat(parameters('servers_synapsedevdemo_name'), '/DevDemo/Default')]",
+            "type": "Microsoft.Storage/storageAccounts/fileServices",
+            "apiVersion": "2019-06-01",
+            "name": "[concat(parameters('storageAccounts_storagedemo123_name'), '/default')]",
             "dependsOn": [
-                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_synapsedevdemo_name'), 'DevDemo')]"
+                "[resourceId('Microsoft.Storage/storageAccounts', parameters('storageAccounts_storagedemo123_name'))]"
             ],
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
             "properties": {
-                "state": "Disabled",
-                "retentionDays": 0,
-                "auditActionsAndGroups": [],
-                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000",
-                "isStorageSecondaryKeyInUse": false,
-                "isAzureMonitorTargetEnabled": false
-            }
-        },
-        {
-            "type": "Microsoft.Sql/servers/databases/extendedAuditingSettings",
-            "apiVersion": "2017-03-01-preview",
-            "name": "[concat(parameters('servers_synapsedevdemo_name'), '/DevDemo/Default')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_synapsedevdemo_name'), 'DevDemo')]"
-            ],
-            "properties": {
-                "state": "Disabled",
-                "retentionDays": 0,
-                "auditActionsAndGroups": [],
-                "storageAccountSubscriptionId": "00000000-0000-0000-0000-000000000000",
-                "isStorageSecondaryKeyInUse": false,
-                "isAzureMonitorTargetEnabled": false
-            }
-        },
-        {
-            "type": "Microsoft.Sql/servers/databases/geoBackupPolicies",
-            "apiVersion": "2014-04-01",
-            "name": "[concat(parameters('servers_synapsedevdemo_name'), '/DevDemo/Default')]",
-            "location": "Central US",
-            "dependsOn": [
-                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_synapsedevdemo_name'), 'DevDemo')]"
-            ],
-            "properties": {
-                "state": "Enabled"
-            }
-        },
-        {
-            "type": "Microsoft.Sql/servers/databases/securityAlertPolicies",
-            "apiVersion": "2018-06-01-preview",
-            "name": "[concat(parameters('servers_synapsedevdemo_name'), '/DevDemo/Default')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_synapsedevdemo_name'), 'DevDemo')]"
-            ],
-            "properties": {
-                "state": "Disabled",
-                "disabledAlerts": [
-                    ""
-                ],
-                "emailAddresses": [
-                    ""
-                ],
-                "emailAccountAdmins": false,
-                "retentionDays": 0
-            }
-        },
-        {
-            "type": "Microsoft.Sql/servers/databases/transparentDataEncryption",
-            "apiVersion": "2014-04-01",
-            "name": "[concat(parameters('servers_synapsedevdemo_name'), '/DevDemo/current')]",
-            "location": "Central US",
-            "dependsOn": [
-                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_synapsedevdemo_name'), 'DevDemo')]"
-            ],
-            "properties": {
-                "status": "Disabled"
-            }
-        },
-        {
-            "type": "Microsoft.Sql/servers/databases/vulnerabilityAssessments",
-            "apiVersion": "2017-03-01-preview",
-            "name": "[concat(parameters('servers_synapsedevdemo_name'), '/DevDemo/Default')]",
-            "dependsOn": [
-                "[resourceId('Microsoft.Sql/servers/databases', parameters('servers_synapsedevdemo_name'), 'DevDemo')]"
-            ],
-            "properties": {
-                "recurringScans": {
-                    "isEnabled": false,
-                    "emailSubscriptionAdmins": true
+                "cors": {
+                    "corsRules": []
                 }
             }
         }
